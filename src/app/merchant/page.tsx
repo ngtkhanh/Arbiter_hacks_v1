@@ -9,6 +9,7 @@ export default function MerchantPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
   const { data: itemsData, mutate } = useSWR('/api/items', fetcher);
+  const { data: ordersData, mutate: mutateOrders } = useSWR('/api/merchant/orders', fetcher, { refreshInterval: 5000 });
 
   // Fake base64 for demo backup mode to avoid real upload hassle
   const handleDemoBackup = async (type: 'croissant' | 'baguette') => {
@@ -77,6 +78,18 @@ export default function MerchantPage() {
   const handleStop = async (id: number) => {
     await fetch(`/api/items/${id}`, { method: 'DELETE' });
     mutate(); // Refresh list immediately
+  };
+
+  const handleOrderAction = async (id: number, action: 'COMPLETED' | 'CANCELLED') => {
+    await fetch(`/api/merchant/orders/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action })
+    });
+    mutateOrders();
+    if (action === 'CANCELLED') {
+      mutate(); // Refresh inventory if cancelled
+    }
   };
 
   return (
@@ -164,6 +177,39 @@ export default function MerchantPage() {
           </div>
         </section>
       </div>
+
+      {/* BOTTOM ROW: ORDERS KANBAN */}
+      <section className="glass-card" style={{ padding: '2rem', marginTop: '2rem' }}>
+        <h2>Live Orders Kanban</h2>
+        <p style={{ marginBottom: '1.5rem', color: 'var(--color-text-secondary)' }}>Manage customer pickups in real-time</p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          {ordersData?.data?.filter((o: any) => o.status === 'PENDING').map((order: any) => {
+            const timeLeft = order.expiresAt ? Math.max(0, Math.floor((new Date(order.expiresAt).getTime() - Date.now()) / 60000)) : 0;
+            return (
+              <div key={order.id} style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{order.pickupCode}</span>
+                  <span style={{ color: timeLeft > 5 ? 'var(--color-warning)' : 'var(--color-error)', fontSize: '0.9rem' }}>
+                    ⏳ Còn {timeLeft} phút
+                  </span>
+                </div>
+                <h3 style={{ margin: '0.5rem 0' }}>{order.customerName}</h3>
+                <p style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+                  {order.clearanceItem?.name} (x{order.quantity}) - {order.lockedPrice.toLocaleString('vi-VN')}đ
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button onClick={() => handleOrderAction(order.id, 'COMPLETED')} className="btn-primary" style={{ flex: 1, background: 'var(--color-success)' }}>✅ Đã thanh toán</button>
+                  <button onClick={() => handleOrderAction(order.id, 'CANCELLED')} className="btn-primary" style={{ flex: 1, background: 'var(--color-error)' }}>❌ Khách không đến</button>
+                </div>
+              </div>
+            );
+          })}
+          {(!ordersData?.data || ordersData.data.filter((o: any) => o.status === 'PENDING').length === 0) && (
+            <p style={{ color: 'var(--color-text-muted)' }}>Chưa có đơn đặt chỗ nào.</p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

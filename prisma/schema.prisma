@@ -27,9 +27,11 @@ model Reservation {
   customerName    String
   quantity        Int
   lockedPrice     Float
+  pickupCode      String?
   status          String        @default("PENDING") // PENDING, COMPLETED, CANCELLED
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  expiresAt       DateTime?
   clearanceItem   ClearanceItem @relation(fields: [clearanceItemId], references: [id])
   clearanceItemId Int
 }

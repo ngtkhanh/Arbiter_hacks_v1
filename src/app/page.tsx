@@ -28,7 +28,7 @@ function interpolatePrice(decaySchedule: any[], minutesRemaining: number, basePr
   return minPrice;
 }
 
-function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: any, simulatedOffsetMinutes: number, onReserveSuccess: () => void }) {
+function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: any, simulatedOffsetMinutes: number, onReserveSuccess: (receipt: any) => void }) {
   const [currentPrice, setCurrentPrice] = useState(item.currentPrice);
   const [prevPrice, setPrevPrice] = useState(item.currentPrice);
   const [isReserving, setIsReserving] = useState(false);
@@ -85,8 +85,8 @@ function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: an
               body: JSON.stringify({ itemId: item.id, quantity: 1, lockedPrice: currentPrice })
             });
             if (res.ok) {
-              alert('Giữ chỗ thành công với giá ' + currentPrice.toLocaleString('vi-VN') + 'đ!');
-              onReserveSuccess();
+              const resData = await res.json();
+              onReserveSuccess(resData.data);
             } else {
               alert('Lỗi: Không thể giữ chỗ (có thể đã hết hàng).');
             }
@@ -108,6 +108,23 @@ function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: an
 export default function StorefrontPage() {
   const { data, isLoading, mutate } = useSWR('/api/items', fetcher, { refreshInterval: 5000 });
   const [simulatedOffsetMinutes, setSimulatedOffsetMinutes] = useState(0);
+  const [receipt, setReceipt] = useState<any>(null);
+  const [receiptTimeLeft, setReceiptTimeLeft] = useState<number>(0);
+
+  useEffect(() => {
+    if (!receipt) return;
+    const interval = setInterval(() => {
+      const expiresAt = new Date(receipt.expiresAt).getTime();
+      const left = Math.max(0, Math.floor((expiresAt - Date.now()) / 60000));
+      setReceiptTimeLeft(left);
+      if (left === 0) {
+        alert("Đã hết thời gian giữ chỗ!");
+        setReceipt(null);
+        mutate();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [receipt, mutate]);
 
   return (
     <div style={{ minHeight: '100vh', paddingBottom: '100px' }}>
@@ -120,12 +137,34 @@ export default function StorefrontPage() {
       </header>
 
       <main className="container">
-        {isLoading ? (
+        {receipt ? (
+          <div className="glass-card" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', textAlign: 'center', border: '2px solid var(--color-primary)' }}>
+            <h2 style={{ color: 'var(--color-primary-light)', marginBottom: '1rem' }}>🎉 Đặt chỗ thành công</h2>
+            <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+              <p style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Mã nhận hàng của bạn</p>
+              <h1 style={{ fontSize: '3rem', margin: '0', color: 'var(--color-primary)' }}>{receipt.pickupCode}</h1>
+            </div>
+            
+            <div style={{ textAlign: 'left', marginBottom: '1.5rem', padding: '1rem', background: 'var(--color-surface-elevated)', borderRadius: 'var(--radius-sm)' }}>
+              <p><strong>Món:</strong> Lô hàng #{receipt.clearanceItemId} (x{receipt.quantity})</p>
+              <p><strong>Giá chốt:</strong> {receipt.lockedPrice.toLocaleString('vi-VN')}đ</p>
+              <p><strong>Địa chỉ:</strong> Tiệm bánh Arbiter, 123 Hackathon St.</p>
+            </div>
+
+            <div style={{ padding: '1rem', background: receiptTimeLeft > 5 ? 'var(--color-warning)' : 'var(--color-error)', color: '#000', borderRadius: 'var(--radius-md)', fontWeight: 'bold' }}>
+              ⏳ Vui lòng đến nhận hàng trong: {receiptTimeLeft} phút
+            </div>
+            
+            <button onClick={() => { setReceipt(null); mutate(); }} className="btn-primary" style={{ marginTop: '1.5rem', width: '100%' }}>
+              Trở về trang chủ
+            </button>
+          </div>
+        ) : isLoading ? (
           <p style={{ textAlign: 'center' }}>Đang tải hàng...</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
             {data?.data?.map((item: any) => (
-              <ItemCard key={item.id} item={item} simulatedOffsetMinutes={simulatedOffsetMinutes} onReserveSuccess={() => mutate()} />
+              <ItemCard key={item.id} item={item} simulatedOffsetMinutes={simulatedOffsetMinutes} onReserveSuccess={(r) => { setReceipt(r); mutate(); }} />
             ))}
             {!data?.data?.length && (
               <p style={{ textAlign: 'center', gridColumn: '1 / -1', color: 'var(--color-text-muted)' }}>Chưa có món hàng nào xả kho hôm nay.</p>

@@ -19,12 +19,17 @@ export async function POST(req: NextRequest) {
         throw new Error('Not enough quantity available');
       }
 
+      const pickupCode = `#RC-${Math.floor(1000 + Math.random() * 9000)}`;
+      const expiresAt = new Date(Date.now() + 20 * 60 * 1000); // 20 minutes from now
+
       const res = await tx.reservation.create({
         data: {
           clearanceItemId: itemId,
           quantity,
           lockedPrice,
-          customerName: customerName || 'Khách vãng lai'
+          customerName: customerName || 'Khách vãng lai',
+          pickupCode,
+          expiresAt
         }
       });
 
