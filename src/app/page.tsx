@@ -108,46 +108,74 @@ function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: an
 export default function StorefrontPage() {
   const { data, isLoading, mutate } = useSWR('/api/items', fetcher, { refreshInterval: 5000 });
   const [simulatedOffsetMinutes, setSimulatedOffsetMinutes] = useState(0);
-  const [receipt, setReceipt] = useState<any>(null);
+  const [activeReceipt, setActiveReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [receiptTimeLeft, setReceiptTimeLeft] = useState<number>(0);
 
+  // Load from local storage on mount
   useEffect(() => {
-    if (!receipt) return;
+    const saved = localStorage.getItem('activeReceipt');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (new Date(parsed.expiresAt).getTime() > Date.now()) {
+          setActiveReceipt(parsed);
+        } else {
+          localStorage.removeItem('activeReceipt');
+        }
+      } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!activeReceipt) return;
     const interval = setInterval(() => {
-      const expiresAt = new Date(receipt.expiresAt).getTime();
+      const expiresAt = new Date(activeReceipt.expiresAt).getTime();
       const left = Math.max(0, Math.floor((expiresAt - Date.now()) / 60000));
       setReceiptTimeLeft(left);
       if (left === 0) {
         alert("Đã hết thời gian giữ chỗ!");
-        setReceipt(null);
+        setActiveReceipt(null);
+        setShowReceipt(false);
+        localStorage.removeItem('activeReceipt');
         mutate();
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [receipt, mutate]);
+  }, [activeReceipt, mutate]);
 
   return (
     <div style={{ minHeight: '100vh', paddingBottom: '100px' }}>
-      <header style={{ padding: '2rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)', marginBottom: '2rem' }}>
+      <header style={{ padding: '2rem 1rem', textAlign: 'center', borderBottom: '1px solid var(--color-border)', marginBottom: '2rem', position: 'relative' }}>
         <h1 style={{ color: 'var(--color-primary)', display: 'inline-block', position: 'relative' }}>
           Clearance Sale
           <span className="pulse-glow" style={{ position: 'absolute', top: -5, right: -15, width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }}></span>
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>Giá giảm từng phút. Chốt deal trước khi hết hàng!</p>
+        
+        {activeReceipt && !showReceipt && (
+          <button 
+            onClick={() => setShowReceipt(true)} 
+            className="btn-primary" 
+            style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-success)' }}
+          >
+            🎫 Xem mã: {activeReceipt.pickupCode}
+          </button>
+        )}
       </header>
 
       <main className="container">
-        {receipt ? (
+        {showReceipt && activeReceipt ? (
           <div className="glass-card" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', textAlign: 'center', border: '2px solid var(--color-primary)' }}>
             <h2 style={{ color: 'var(--color-primary-light)', marginBottom: '1rem' }}>🎉 Đặt chỗ thành công</h2>
             <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
               <p style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Mã nhận hàng của bạn</p>
-              <h1 style={{ fontSize: '3rem', margin: '0', color: 'var(--color-primary)' }}>{receipt.pickupCode}</h1>
+              <h1 style={{ fontSize: '3rem', margin: '0', color: 'var(--color-primary)' }}>{activeReceipt.pickupCode}</h1>
             </div>
             
             <div style={{ textAlign: 'left', marginBottom: '1.5rem', padding: '1rem', background: 'var(--color-surface-elevated)', borderRadius: 'var(--radius-sm)' }}>
-              <p><strong>Món:</strong> Lô hàng #{receipt.clearanceItemId} (x{receipt.quantity})</p>
-              <p><strong>Giá chốt:</strong> {receipt.lockedPrice.toLocaleString('vi-VN')}đ</p>
+              <p><strong>Món:</strong> Lô hàng #{activeReceipt.clearanceItemId} (x{activeReceipt.quantity})</p>
+              <p><strong>Giá chốt:</strong> {activeReceipt.lockedPrice.toLocaleString('vi-VN')}đ</p>
               <p><strong>Địa chỉ:</strong> Tiệm bánh Arbiter, 123 Hackathon St.</p>
             </div>
 
@@ -155,7 +183,7 @@ export default function StorefrontPage() {
               ⏳ Vui lòng đến nhận hàng trong: {receiptTimeLeft} phút
             </div>
             
-            <button onClick={() => { setReceipt(null); mutate(); }} className="btn-primary" style={{ marginTop: '1.5rem', width: '100%' }}>
+            <button onClick={() => setShowReceipt(false)} className="btn-primary" style={{ marginTop: '1.5rem', width: '100%' }}>
               Trở về trang chủ
             </button>
           </div>
@@ -164,7 +192,12 @@ export default function StorefrontPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
             {data?.data?.map((item: any) => (
-              <ItemCard key={item.id} item={item} simulatedOffsetMinutes={simulatedOffsetMinutes} onReserveSuccess={(r) => { setReceipt(r); mutate(); }} />
+              <ItemCard key={item.id} item={item} simulatedOffsetMinutes={simulatedOffsetMinutes} onReserveSuccess={(r) => { 
+                setActiveReceipt(r); 
+                setShowReceipt(true); 
+                localStorage.setItem('activeReceipt', JSON.stringify(r));
+                mutate(); 
+              }} />
             ))}
             {!data?.data?.length && (
               <p style={{ textAlign: 'center', gridColumn: '1 / -1', color: 'var(--color-text-muted)' }}>Chưa có món hàng nào xả kho hôm nay.</p>
