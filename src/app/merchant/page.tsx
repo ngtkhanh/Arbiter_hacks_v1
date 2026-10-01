@@ -74,6 +74,11 @@ export default function MerchantPage() {
     mutate(); // Refresh list
   };
 
+  const handleStop = async (id: number) => {
+    await fetch(`/api/items/${id}`, { method: 'DELETE' });
+    mutate(); // Refresh list immediately
+  };
+
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
       <header style={{ marginBottom: '2rem' }}>
@@ -147,9 +152,12 @@ export default function MerchantPage() {
                   <h4 style={{ margin: 0 }}>{item.name}</h4>
                   <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Kho: {item.currentQuantity} | Gốc: {item.originalPrice}đ</span>
                 </div>
-                <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>
-                  Live
-                </span>
+                <button 
+                  onClick={() => handleStop(item.id)}
+                  style={{ background: 'var(--color-error)', color: 'white', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}
+                >
+                  Dừng xả kho
+                </button>
               </div>
             ))}
             {!itemsData?.data?.length && <p style={{ color: 'var(--color-text-muted)' }}>Kho trống.</p>}
