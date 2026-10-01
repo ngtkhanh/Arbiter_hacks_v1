@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ClearanceItem {
+  id              Int           @id @default(autoincrement())
+  name            String
+  originalPrice   Float
+  currentPrice    Float
+  initialQuantity Int
+  currentQuantity Int
+  expiresAt       DateTime
+  aiPricingStrategy String? // JSON string containing decay_schedule
+  aiRationale     String? // Explanation from AI
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  reservations    Reservation[]
+}
+
+model Reservation {
+  id              Int           @id @default(autoincrement())
+  customerName    String
+  quantity        Int
+  lockedPrice     Float
+  status          String        @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clearanceItem   ClearanceItem @relation(fields: [clearanceItemId], references: [id])
+  clearanceItemId Int
+}
