@@ -28,9 +28,10 @@ function interpolatePrice(decaySchedule: any[], minutesRemaining: number, basePr
   return minPrice;
 }
 
-function ItemCard({ item, simulatedOffsetMinutes }: { item: any, simulatedOffsetMinutes: number }) {
+function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: any, simulatedOffsetMinutes: number, onReserveSuccess: () => void }) {
   const [currentPrice, setCurrentPrice] = useState(item.currentPrice);
   const [prevPrice, setPrevPrice] = useState(item.currentPrice);
+  const [isReserving, setIsReserving] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -73,15 +74,39 @@ function ItemCard({ item, simulatedOffsetMinutes }: { item: any, simulatedOffset
         </div>
       </div>
 
-      <button className="btn-primary" style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-        <ShoppingCart size={18} /> Giữ chỗ ngay
+      <button 
+        className="btn-primary" 
+        onClick={async () => {
+          setIsReserving(true);
+          try {
+            const res = await fetch('/api/reserve', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ itemId: item.id, quantity: 1, lockedPrice: currentPrice })
+            });
+            if (res.ok) {
+              alert('Giữ chỗ thành công với giá ' + currentPrice.toLocaleString('vi-VN') + 'đ!');
+              onReserveSuccess();
+            } else {
+              alert('Lỗi: Không thể giữ chỗ (có thể đã hết hàng).');
+            }
+          } catch (e) {
+            alert('Lỗi kết nối.');
+          } finally {
+            setIsReserving(false);
+          }
+        }}
+        disabled={isReserving}
+        style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '0.5rem', opacity: isReserving ? 0.7 : 1 }}
+      >
+        <ShoppingCart size={18} /> {isReserving ? 'Đang xử lý...' : 'Giữ chỗ ngay'}
       </button>
     </div>
   );
 }
 
 export default function StorefrontPage() {
-  const { data, isLoading } = useSWR('/api/items', fetcher, { refreshInterval: 5000 });
+  const { data, isLoading, mutate } = useSWR('/api/items', fetcher, { refreshInterval: 5000 });
   const [simulatedOffsetMinutes, setSimulatedOffsetMinutes] = useState(0);
 
   return (
@@ -100,7 +125,7 @@ export default function StorefrontPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
             {data?.data?.map((item: any) => (
-              <ItemCard key={item.id} item={item} simulatedOffsetMinutes={simulatedOffsetMinutes} />
+              <ItemCard key={item.id} item={item} simulatedOffsetMinutes={simulatedOffsetMinutes} onReserveSuccess={() => mutate()} />
             ))}
             {!data?.data?.length && (
               <p style={{ textAlign: 'center', gridColumn: '1 / -1', color: 'var(--color-text-muted)' }}>Chưa có món hàng nào xả kho hôm nay.</p>
