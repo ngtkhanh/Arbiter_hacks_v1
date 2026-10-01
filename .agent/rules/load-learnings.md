@@ -1,9 +1,10 @@
 ---
-
+trigger: always_on
 description: Tự động load learnings liên quan từ .agents/learnings/ ở đầu mỗi session
 globs: "**/*.{kt,java,xml,gradle,kts}"
-trigger: always_on
-------------------
+---
+
+---------------
 
 # Load Learnings Rule
 
@@ -17,7 +18,7 @@ Rule này áp dụng **tự động** mỗi khi bắt đầu một session hoặ
 
 ### Đầu mỗi session, AI PHẢI:
 
-1. **Đọc danh sách file** trong `.agents/learnings/` (chỉ tên file, KHÔNG đọc nội dung).
+1. **Đọc danh sách file** trong `.agent/learnings/` (chỉ tên file, KHÔNG đọc nội dung).
 
 2. **Xác định các file có khả năng liên quan** đến task/câu hỏi hiện tại dựa trên tên file.
 
@@ -58,7 +59,7 @@ Rule này áp dụng **tự động** mỗi khi bắt đầu một session hoặ
 
 4. **Chỉ đọc nội dung learning thực sự liên quan**.
 
-   Không đọc toàn bộ các file chỉ vì chúng tồn tại trong `.agents/learnings/`.
+   Không đọc toàn bộ các file chỉ vì chúng tồn tại trong `.agent/learnings/`.
 
 5. **Nếu task liên quan đến nhiều feature/module**, có thể đọc learning từ nhiều file tương ứng.
 
@@ -68,7 +69,7 @@ Rule này áp dụng **tự động** mỗi khi bắt đầu một session hoặ
 
 ## Quy tắc
 
-* Nếu `.agents/learnings/` không tồn tại hoặc không có file → bỏ qua, không báo lỗi.
+* Nếu `.agent/learnings/` không tồn tại hoặc không có file → bỏ qua, không báo lỗi.
 * Nếu learning file rỗng → bỏ qua.
 * Không đọc lại cùng một learning nếu đã đọc trong cùng một session, trừ khi cần kiểm tra phần nội dung mới được cập nhật.
 * **Không đọc tất cả file learning mặc định.**
