@@ -104,6 +104,13 @@ export default function MerchantPage() {
   const handlePublish = async () => {
     if (!aiResult) return;
     
+    // Override the lowest price in the decay schedule
+    const finalDecaySchedule = [...(aiResult.decay_schedule || [])];
+    if (finalDecaySchedule.length > 0) {
+      finalDecaySchedule.sort((a, b) => b.minutes_before_close - a.minutes_before_close);
+      finalDecaySchedule[finalDecaySchedule.length - 1].price = aiResult.min_price;
+    }
+
     await fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -112,7 +119,7 @@ export default function MerchantPage() {
         quantity: aiResult.quantity,
         originalPrice: aiResult.base_price,
         imageUrl: uploadedImage,
-        aiPricingStrategy: { decay_schedule: aiResult.decay_schedule },
+        aiPricingStrategy: { decay_schedule: finalDecaySchedule },
         aiRationale: aiResult.ai_rationale
       })
     });
@@ -229,7 +236,7 @@ export default function MerchantPage() {
                     ))}
                   </select>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Số lượng</label>
                     <input 
@@ -245,6 +252,15 @@ export default function MerchantPage() {
                       type="number" 
                       value={aiResult.base_price} 
                       onChange={e => setAiResult({...aiResult, base_price: parseInt(e.target.value) || 0})}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'white' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Giá sàn (VNĐ)</label>
+                    <input 
+                      type="number" 
+                      value={aiResult.min_price} 
+                      onChange={e => setAiResult({...aiResult, min_price: parseInt(e.target.value) || 0})}
                       style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'white' }}
                     />
                   </div>
