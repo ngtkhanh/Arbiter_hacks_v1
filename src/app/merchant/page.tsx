@@ -104,6 +104,10 @@ export default function MerchantPage() {
   const handleResetSystem = async () => {
     if (!confirm("CẢNH BÁO: Hành động này sẽ xóa sạch toàn bộ hàng hóa đang bán và lịch sử đơn hàng. Dùng để reset về số 0 trước khi Pitching. Chắc chắn tiếp tục?")) return;
     await fetch('/api/system/reset', { method: 'POST' });
+    
+    // Gửi tín hiệu sang tab Storefront để xóa giỏ hàng
+    localStorage.setItem('forceReset', Date.now().toString());
+    
     window.location.reload();
   };
 

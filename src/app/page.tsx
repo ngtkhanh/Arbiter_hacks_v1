@@ -12,6 +12,11 @@ function interpolatePrice(decaySchedule: any[], minutesRemaining: number, basePr
   // Sort schedule strictly descending by minutes_before_close
   const sorted = [...decaySchedule].sort((a, b) => b.minutes_before_close - a.minutes_before_close);
   
+  // Nếu AI không trả mốc 120 (mốc khởi đầu), ta tự nhét vào để giữ đúng giá gốc lúc mới lên kệ
+  if (sorted[0].minutes_before_close < 120) {
+    sorted.unshift({ minutes_before_close: 120, price: basePrice });
+  }
+  
   if (minutesRemaining >= sorted[0].minutes_before_close) return sorted[0].price;
   if (minutesRemaining <= sorted[sorted.length - 1].minutes_before_close) return sorted[sorted.length - 1].price;
 
@@ -130,6 +135,16 @@ export default function StorefrontPage() {
       } catch (e) {}
     }
 
+    // Lắng nghe tín hiệu Reset từ tab Merchant để xóa giỏ hàng
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'forceReset') {
+        localStorage.removeItem('receipts');
+        setReceipts([]);
+        setShowCart(false);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
     const interval = setInterval(() => {
       setNow(Date.now());
       setReceipts(prev => {
@@ -141,7 +156,10 @@ export default function StorefrontPage() {
         return currentValid;
       });
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   const handleReserveSuccess = (r: any) => {
