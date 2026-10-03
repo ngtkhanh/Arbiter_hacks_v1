@@ -7,9 +7,10 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    // Thay vì set currentQuantity = 0, ta ép expiresAt về quá khứ để biến nó thành rác thải (Top Ế)
     await prisma.clearanceItem.update({
       where: { id: parseInt(id) },
-      data: { currentQuantity: 0 } // Mark as 0 so it disappears from customer view
+      data: { expiresAt: new Date(Date.now() - 60000) } 
     });
     return NextResponse.json({ success: true });
   } catch (error: any) {
