@@ -5,6 +5,7 @@
 
 ## 1. Nâng cấp cốt lõi: Luồng AI & Merchant (Ưu tiên cao nhất)
 - [x] ✅ **Cho phép chụp ảnh / tải ảnh thật:** Gỡ bỏ hoàn toàn luồng giả lập (mock), dùng 100% input camera/upload kết nối API `/api/analyze`.
+- [ ] ❌ **Merchant Mobile Scanner:** Giao diện di động tối giản để người bán chụp ảnh trực tiếp tại kệ, phân tích AI và đưa lên Storefront tức thì.
 - [x] ✅ **Cho phép Merchant chỉnh sửa (Override) kết quả AI:** Form cho phép sửa số lượng, giá gốc, giá sàn trước khi push lên Storefront.
 - [x] ✅ **Lưu và hiển thị ảnh sản phẩm:** Cập nhật DB schema (`imageUrl` cho `ClearanceItem`) và render ảnh trên Storefront.
 - [x] ✅ **Nhận diện dựa trên Danh mục (Catalog-based Recognition):** Áp dụng RAG nhúng danh mục `Product` từ DB vào Prompt, đảm bảo AI map đúng sản phẩm và lấy đúng giá gốc, loại bỏ hoàn toàn việc "đoán mò".
