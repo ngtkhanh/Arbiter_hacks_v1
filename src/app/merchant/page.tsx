@@ -95,6 +95,10 @@ export default function MerchantPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action })
     });
+    
+    // Bắn tín hiệu sang Storefront để cập nhật giỏ hàng ngay lập tức (Real-time effect)
+    localStorage.setItem('removeReceipt', JSON.stringify({ id, ts: Date.now() }));
+    
     mutateOrders();
     if (action === 'CANCELLED') {
       mutate(); // Refresh inventory if cancelled

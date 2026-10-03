@@ -135,12 +135,23 @@ export default function StorefrontPage() {
       } catch (e) {}
     }
 
-    // Lắng nghe tín hiệu Reset từ tab Merchant để xóa giỏ hàng
+    // Lắng nghe tín hiệu từ tab Merchant (Real-time effect)
     const handleStorage = (e: StorageEvent) => {
       if (e.key === 'forceReset') {
         localStorage.removeItem('receipts');
         setReceipts([]);
         setShowCart(false);
+      }
+      if (e.key === 'removeReceipt' && e.newValue) {
+        try {
+          const { id } = JSON.parse(e.newValue);
+          setReceipts(prev => {
+            const updated = prev.filter(r => r.id !== id);
+            localStorage.setItem('receipts', JSON.stringify(updated));
+            if (updated.length === 0) setShowCart(false);
+            return updated;
+          });
+        } catch (err) {}
       }
     };
     window.addEventListener('storage', handleStorage);
