@@ -44,7 +44,8 @@ export async function GET() {
         const diffMs = item.updatedAt.getTime() - item.createdAt.getTime();
         return acc + diffMs / (1000 * 60);
       }, 0);
-      avgClearanceSpeedMinutes = Math.round(totalMinutes / soldOutItems.length);
+      // Đảm bảo tốc độ tối thiểu là 1 phút kể cả khi demo bấm cực nhanh
+      avgClearanceSpeedMinutes = Math.max(1, Math.round(totalMinutes / soldOutItems.length));
     }
 
     return NextResponse.json({
