@@ -8,7 +8,7 @@
 - [x] Nhận diện chính xác dựa trên danh mục (Catalog-based RAG).
 
 ## 2. Tối ưu Trải nghiệm Demo & Hiệu ứng FOMO (Ưu tiên Cao) 🔥
-- [ ] **Merchant Mobile Scanner:** Giao diện di động tối giản cho người bán chụp ảnh tại kệ, phân tích Vision AI và đưa lên Storefront tức thì để tạo hiệu ứng WOW khi demo.
+- [ ] **Merchant Mobile Scanner & AI Freshness Assessment:** Giao diện di động tối giản cho người bán chụp ảnh tại kệ, Gemini Vision vừa đếm SKU vừa thẩm định độ tươi/chất lượng cảm quan (`visual_condition`, `freshness_score`) để tự động đề xuất biên độ giảm giá thông minh.
 - [ ] **Hiển thị lộ trình giá trực quan:** Đồ thị hoặc thanh tiến trình cho thấy giá sẽ giảm đến mức nào tiếp theo.
 - [ ] **Hiệu ứng thời gian thực:** Flash/highlight nhấp nháy hoặc âm thanh nhẹ khi giá nhảy xuống mức mới để tạo cảm giác giằng co và hối thúc người mua.
 - [ ] **Mã QR nhận hàng giả lập:** Nhấn "Đặt trước" -> Hiện QR Code ngay lập tức để hoàn thành luồng (không cần thanh toán hay đăng nhập phức tạp).
