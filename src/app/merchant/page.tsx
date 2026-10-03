@@ -19,8 +19,8 @@ export default function MerchantPage() {
     setIsScanning(true);
     setAiResult(null);
     setUploadedImage(type === 'croissant' 
-      ? 'https://images.unsplash.com/photo-1549996647-190b679b33d7?auto=format&fit=crop&w=800&q=80' 
-      : 'https://images.unsplash.com/photo-1597075687490-8f673c6c17f6?auto=format&fit=crop&w=800&q=80');
+      ? 'https://images.unsplash.com/photo-1555507036-ab1f40ce88f9?auto=format&fit=crop&w=800&q=80' 
+      : 'https://images.unsplash.com/photo-1589367920969-ab8e050bfc19?auto=format&fit=crop&w=800&q=80');
 
     // MOCK: In a real app we upload the real base64 image. For the hackathon demo, 
     // we bypass Gemini call sometimes or pass a real prompt to Gemini.
