@@ -10,6 +10,7 @@ export default function MerchantPage() {
   const [aiResult, setAiResult] = useState<any>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: catalogData } = useSWR('/api/products', fetcher);
   const { data: itemsData, mutate } = useSWR('/api/items', fetcher);
   const { data: ordersData, mutate: mutateOrders } = useSWR('/api/merchant/orders', fetcher, { refreshInterval: 5000 });
 
@@ -204,13 +205,29 @@ export default function MerchantPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Tên món hàng</label>
-                  <input 
-                    type="text" 
-                    value={aiResult.item_name} 
-                    onChange={e => setAiResult({...aiResult, item_name: e.target.value})}
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Sản phẩm (Khớp với Catalog)</label>
+                  <select 
+                    value={aiResult.productId || ''} 
+                    onChange={e => {
+                      const selectedId = parseInt(e.target.value);
+                      const selectedProduct = catalogData?.data?.find((p: any) => p.id === selectedId);
+                      if (selectedProduct) {
+                        setAiResult({
+                          ...aiResult, 
+                          productId: selectedProduct.id,
+                          item_name: selectedProduct.name,
+                          base_price: selectedProduct.basePrice,
+                          min_price: selectedProduct.minPrice
+                        });
+                      }
+                    }}
                     style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'white' }}
-                  />
+                  >
+                    <option value="" disabled>-- Chọn sản phẩm --</option>
+                    {catalogData?.data?.map((p: any) => (
+                      <option key={p.id} value={p.id}>{p.name} (Gốc: {p.basePrice}đ)</option>
+                    ))}
+                  </select>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
