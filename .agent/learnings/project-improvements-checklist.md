@@ -4,9 +4,9 @@
 > Trạng thái: ✅ (Đã hoàn thành) | ❌ (Chưa hoàn thành)
 
 ## 1. Nâng cấp cốt lõi: Luồng AI & Merchant (Ưu tiên cao nhất)
-- [ ] ❌ **Cho phép chụp ảnh / tải ảnh thật:** Thêm input camera/upload ảnh thực tế kết nối vào API `/api/analyze` (thay vì chỉ dùng nút mock).
-- [ ] ❌ **Cho phép Merchant chỉnh sửa (Override) kết quả AI:** Form cho phép sửa tên, số lượng, thời gian, giá sàn trước khi push lên Storefront.
-- [ ] ❌ **Lưu và hiển thị ảnh sản phẩm:** Cập nhật DB schema (`imageUrl` cho `ClearanceItem`) và render ảnh trên Storefront.
+- [x] ✅ **Cho phép chụp ảnh / tải ảnh thật:** Thêm input camera/upload ảnh thực tế kết nối vào API `/api/analyze` (thay vì chỉ dùng nút mock).
+- [x] ✅ **Cho phép Merchant chỉnh sửa (Override) kết quả AI:** Form cho phép sửa tên, số lượng, thời gian, giá sàn trước khi push lên Storefront.
+- [x] ✅ **Lưu và hiển thị ảnh sản phẩm:** Cập nhật DB schema (`imageUrl` cho `ClearanceItem`) và render ảnh trên Storefront.
 
 ## 2. Trải nghiệm người mua (Storefront) & Yếu tố kích cầu (FOMO)
 - [ ] ❌ **Hiển thị biểu đồ / mốc lộ trình giá (Price Decay Curve):** Hiển thị trực quan các mốc giá tiếp theo để tạo tâm lý giằng co cho khách.

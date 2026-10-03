@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         initialQuantity: body.quantity,
         currentQuantity: body.quantity,
         expiresAt: expiresAt,
+        imageUrl: body.imageUrl || null,
         aiPricingStrategy: body.aiPricingStrategy ? JSON.stringify(body.aiPricingStrategy) : null,
         aiRationale: body.aiRationale || null
       }

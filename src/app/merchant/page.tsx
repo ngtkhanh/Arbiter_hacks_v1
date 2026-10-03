@@ -1,13 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import useSWR from 'swr';
-import { Camera, UploadCloud, CheckCircle2, Clock, Package } from 'lucide-react';
+import { Camera, UploadCloud, CheckCircle2, Clock, Package, Image as ImageIcon } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function MerchantPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: itemsData, mutate } = useSWR('/api/items', fetcher);
   const { data: ordersData, mutate: mutateOrders } = useSWR('/api/merchant/orders', fetcher, { refreshInterval: 5000 });
 
@@ -15,6 +17,9 @@ export default function MerchantPage() {
   const handleDemoBackup = async (type: 'croissant' | 'baguette') => {
     setIsScanning(true);
     setAiResult(null);
+    setUploadedImage(type === 'croissant' 
+      ? 'https://images.unsplash.com/photo-1549996647-190b679b33d7?auto=format&fit=crop&w=800&q=80' 
+      : 'https://images.unsplash.com/photo-1597075687490-8f673c6c17f6?auto=format&fit=crop&w=800&q=80');
 
     // MOCK: In a real app we upload the real base64 image. For the hackathon demo, 
     // we bypass Gemini call sometimes or pass a real prompt to Gemini.
@@ -56,6 +61,45 @@ export default function MerchantPage() {
     }
   };
 
+  const handleRealUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsScanning(true);
+    setAiResult(null);
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target?.result as string;
+      setUploadedImage(base64);
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: base64.split(',')[1], mimeType: file.type })
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data) {
+            setAiResult(data.data);
+          } else {
+            alert('AI không nhận diện được món hàng.');
+          }
+        } else {
+          alert('Lỗi API Analyze.');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Lỗi kết nối.');
+      } finally {
+        setIsScanning(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handlePublish = async () => {
     if (!aiResult) return;
     
@@ -66,12 +110,15 @@ export default function MerchantPage() {
         name: aiResult.item_name,
         quantity: aiResult.quantity,
         originalPrice: aiResult.base_price,
+        imageUrl: uploadedImage,
         aiPricingStrategy: { decay_schedule: aiResult.decay_schedule },
         aiRationale: aiResult.ai_rationale
       })
     });
 
     setAiResult(null);
+    setUploadedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     mutate(); // Refresh list
   };
 
@@ -105,20 +152,36 @@ export default function MerchantPage() {
           <h2>Scanner</h2>
           <p style={{ marginBottom: '1.5rem', color: 'var(--color-text-secondary)' }}>Upload tray photo or use Demo mode</p>
           
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment" 
+            ref={fileInputRef} 
+            style={{ display: 'none' }} 
+            onChange={handleRealUpload} 
+          />
+
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
             <button 
               className="btn-primary" 
-              onClick={() => handleDemoBackup('croissant')}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              onClick={() => fileInputRef.current?.click()}
+              style={{ flex: 2, background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
             >
-              <Camera size={18} /> Ảnh mẫu 1 (Croissant)
+              <Camera size={18} /> Chụp / Tải ảnh thật
+            </button>
+            <button 
+              className="btn-primary" 
+              onClick={() => handleDemoBackup('croissant')}
+              style={{ flex: 1, background: 'var(--color-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}
+            >
+              <ImageIcon size={18} /> Demo 1
             </button>
             <button 
               className="btn-primary" 
               onClick={() => handleDemoBackup('baguette')}
-              style={{ flex: 1, background: 'var(--color-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              style={{ flex: 1, background: 'var(--color-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}
             >
-              <Camera size={18} /> Ảnh mẫu 2 (Baguette)
+              <ImageIcon size={18} /> Demo 2
             </button>
           </div>
 
@@ -133,12 +196,41 @@ export default function MerchantPage() {
             <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
               <h3 style={{ color: 'var(--color-primary-light)', marginBottom: '1rem' }}>✅ AI Phân tích thành công</h3>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Package size={16} /> <strong>{aiResult.item_name}</strong> (x{aiResult.quantity})
+              {uploadedImage && (
+                <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+                  <img src={uploadedImage} alt="Scanned item" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Clock size={16} /> Đề xuất: {aiResult.base_price}đ -> {aiResult.min_price}đ
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Tên món hàng</label>
+                  <input 
+                    type="text" 
+                    value={aiResult.item_name} 
+                    onChange={e => setAiResult({...aiResult, item_name: e.target.value})}
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'white' }}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Số lượng</label>
+                    <input 
+                      type="number" 
+                      value={aiResult.quantity} 
+                      onChange={e => setAiResult({...aiResult, quantity: parseInt(e.target.value) || 0})}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'white' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.3rem' }}>Giá gốc (VNĐ)</label>
+                    <input 
+                      type="number" 
+                      value={aiResult.base_price} 
+                      onChange={e => setAiResult({...aiResult, base_price: parseInt(e.target.value) || 0})}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'white' }}
+                    />
+                  </div>
                 </div>
               </div>
 

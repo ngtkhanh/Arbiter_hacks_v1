@@ -15,6 +15,7 @@ model ClearanceItem {
   initialQuantity Int
   currentQuantity Int
   expiresAt       DateTime
+  imageUrl        String?       // Base64 or URL
   aiPricingStrategy String? // JSON string containing decay_schedule
   aiRationale     String? // Explanation from AI
   createdAt       DateTime      @default(now())

@@ -55,6 +55,11 @@ function ItemCard({ item, simulatedOffsetMinutes, onReserveSuccess }: { item: an
 
   return (
     <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {item.imageUrl && (
+        <div style={{ height: '200px', width: '100%', overflow: 'hidden', borderRadius: 'var(--radius-md)' }}>
+          <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{item.name}</h3>
         <span style={{ background: 'var(--color-primary-dark)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.8rem' }}>
