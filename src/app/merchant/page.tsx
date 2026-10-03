@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import useSWR from 'swr';
 import { Camera, UploadCloud, CheckCircle2, Clock, Package, Image as ImageIcon } from 'lucide-react';
+import EcoDashboard from '../components/EcoDashboard';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -106,6 +107,8 @@ export default function MerchantPage() {
         <h1 style={{ color: 'var(--color-primary)' }}>Merchant Dashboard</h1>
         <p style={{ color: 'var(--color-text-muted)' }}>AI-Powered Clearance System</p>
       </header>
+
+      <EcoDashboard view="merchant" />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         {/* LEFT COL: INPUT */}

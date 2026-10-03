@@ -24,6 +24,6 @@
 - [ ] **Dữ liệu mẫu rực rỡ (Seed Data):** Chuẩn bị sẵn một tập dữ liệu cửa hàng, món ăn có hình ảnh sắc nét, tên gọi hấp dẫn để giao diện luôn ở trạng thái tốt nhất.
 
 ## 5. Chứng minh Hiệu quả Giảm Rác Thải (Bám sát Track Chủ đề) ♻️
-- [ ] **Dashboard Chỉ Số Sinh Thái Thời Gian Thực (Eco-Impact Tracker):** Hiển thị ngay trên trang chủ Storefront con số (kg) thức ăn được cứu và lượng CO2 cắt giảm thành công.
-- [ ] **Báo Cáo Điểm Mù Rác Thải (Waste Analytics cho Merchant):** Biểu đồ thống kê Top 3 món ăn thường xuyên ế/hết hạn nhất, chứng minh hệ thống giúp người bán ngăn chặn rác thải từ nguồn (nhập ít lại).
-- [ ] **Chỉ số Tốc Độ Giải Cứu (Clearance Speed):** Hiển thị thời gian trung bình bán hết hàng (VD: "Giải cứu 50 ổ bánh mì trong 45 phút") để chứng minh hiệu năng của AI Dynamic Pricing so với thủ công.
+- [x] **Dashboard Chỉ Số Sinh Thái Thời Gian Thực (Eco-Impact Tracker):** Hiển thị ngay trên trang chủ Storefront con số (kg) thức ăn được cứu và lượng CO2 cắt giảm thành công.
+- [x] **Báo Cáo Điểm Mù Rác Thải (Waste Analytics cho Merchant):** Biểu đồ thống kê Top 3 món ăn thường xuyên ế/hết hạn nhất, chứng minh hệ thống giúp người bán ngăn chặn rác thải từ nguồn (nhập ít lại).
+- [x] **Chỉ số Tốc Độ Giải Cứu (Clearance Speed):** Hiển thị thời gian trung bình bán hết hàng (VD: "Giải cứu 50 ổ bánh mì trong 45 phút") để chứng minh hiệu năng của AI Dynamic Pricing so với thủ công.

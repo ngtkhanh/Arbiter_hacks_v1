@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { Clock, ShoppingCart } from 'lucide-react';
+import EcoDashboard from './components/EcoDashboard';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -170,6 +171,7 @@ export default function StorefrontPage() {
       </header>
 
       <main className="container">
+        <EcoDashboard view="storefront" />
         {showReceipt && activeReceipt ? (
           <div className="glass-card" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', textAlign: 'center', border: '2px solid var(--color-primary)' }}>
             <h2 style={{ color: 'var(--color-primary-light)', marginBottom: '1rem' }}>🎉 Đặt chỗ thành công</h2>
