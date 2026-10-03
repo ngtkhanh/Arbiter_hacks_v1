@@ -14,53 +14,6 @@ export default function MerchantPage() {
   const { data: itemsData, mutate } = useSWR('/api/items', fetcher);
   const { data: ordersData, mutate: mutateOrders } = useSWR('/api/merchant/orders', fetcher, { refreshInterval: 5000 });
 
-  // Fake base64 for demo backup mode to avoid real upload hassle
-  const handleDemoBackup = async (type: 'croissant' | 'baguette') => {
-    setIsScanning(true);
-    setAiResult(null);
-    setUploadedImage(type === 'croissant' 
-      ? 'https://images.unsplash.com/photo-1555507036-ab1f40ce88f9?auto=format&fit=crop&w=800&q=80' 
-      : 'https://images.unsplash.com/photo-1589367920969-ab8e050bfc19?auto=format&fit=crop&w=800&q=80');
-
-    // MOCK: In a real app we upload the real base64 image. For the hackathon demo, 
-    // we bypass Gemini call sometimes or pass a real prompt to Gemini.
-    // To make sure it always works, we can simulate the API call or hit our API.
-    try {
-      // Fake delay to show "scanning" UI
-      await new Promise(r => setTimeout(r, 2000));
-      
-      const mockAiResult = type === 'croissant' ? {
-        item_name: "Bánh Sừng Bò",
-        quantity: 10,
-        base_price: 25000,
-        min_price: 10000,
-        decay_schedule: [
-          { minutes_before_close: 120, price: 25000 },
-          { minutes_before_close: 90, price: 20000 },
-          { minutes_before_close: 60, price: 15000 },
-          { minutes_before_close: 30, price: 10000 }
-        ],
-        ai_rationale: "Bánh sừng bò hút ẩm nhanh sau 20h, cộng thêm tồn 10 cái là khá nhiều. Đề xuất hạ giá sâu sớm 30 phút để kích cầu xả sạch kho."
-      } : {
-        item_name: "Bánh Mì Baguette",
-        quantity: 5,
-        base_price: 15000,
-        min_price: 5000,
-        decay_schedule: [
-          { minutes_before_close: 120, price: 15000 },
-          { minutes_before_close: 60, price: 10000 },
-          { minutes_before_close: 15, price: 5000 }
-        ],
-        ai_rationale: "Baguette tồn ít (5 cái) nhưng kén người mua giờ muộn. Giữ giá tốt tới 60 phút cuối mới giảm để tối ưu lợi nhuận."
-      };
-
-      setAiResult(mockAiResult);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsScanning(false);
-    }
-  };
 
   const handleRealUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -158,7 +111,7 @@ export default function MerchantPage() {
         {/* LEFT COL: INPUT */}
         <section className="glass-card" style={{ padding: '2rem' }}>
           <h2>Scanner</h2>
-          <p style={{ marginBottom: '1.5rem', color: 'var(--color-text-secondary)' }}>Upload tray photo or use Demo mode</p>
+          <p style={{ marginBottom: '1.5rem', color: 'var(--color-text-secondary)' }}>Upload tray photo to analyze</p>
           
           <input 
             type="file" 
@@ -169,27 +122,13 @@ export default function MerchantPage() {
             onChange={handleRealUpload} 
           />
 
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ marginBottom: '2rem' }}>
             <button 
               className="btn-primary" 
               onClick={() => fileInputRef.current?.click()}
-              style={{ flex: 2, background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              style={{ width: '100%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem' }}
             >
-              <Camera size={18} /> Chụp / Tải ảnh thật
-            </button>
-            <button 
-              className="btn-primary" 
-              onClick={() => handleDemoBackup('croissant')}
-              style={{ flex: 1, background: 'var(--color-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}
-            >
-              <ImageIcon size={18} /> Demo 1
-            </button>
-            <button 
-              className="btn-primary" 
-              onClick={() => handleDemoBackup('baguette')}
-              style={{ flex: 1, background: 'var(--color-surface-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem' }}
-            >
-              <ImageIcon size={18} /> Demo 2
+              <Camera size={20} /> Chụp / Tải ảnh thật
             </button>
           </div>
 
