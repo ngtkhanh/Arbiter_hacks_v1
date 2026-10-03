@@ -101,11 +101,22 @@ export default function MerchantPage() {
     }
   };
 
+  const handleResetSystem = async () => {
+    if (!confirm("CẢNH BÁO: Hành động này sẽ xóa sạch toàn bộ hàng hóa đang bán và lịch sử đơn hàng. Dùng để reset về số 0 trước khi Pitching. Chắc chắn tiếp tục?")) return;
+    await fetch('/api/system/reset', { method: 'POST' });
+    window.location.reload();
+  };
+
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
-      <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ color: 'var(--color-primary)' }}>Merchant Dashboard</h1>
-        <p style={{ color: 'var(--color-text-muted)' }}>AI-Powered Clearance System</p>
+      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ color: 'var(--color-primary)' }}>Merchant Dashboard</h1>
+          <p style={{ color: 'var(--color-text-muted)' }}>AI-Powered Clearance System</p>
+        </div>
+        <button onClick={handleResetSystem} className="btn-primary" style={{ background: 'var(--color-error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          🔄 Reset Demo
+        </button>
       </header>
 
       <EcoDashboard view="merchant" />

@@ -20,7 +20,7 @@
 
 ## 4. Kịch bản Pitching & Vận hành Demo ⚙️
 - [ ] **Cơ chế "Time-lapse" (Ép giá giảm):** Thay vì bắt giám khảo đợi 5-10 phút để thấy giá giảm, cần có một nút ẩn (hoặc phím tắt) để kích hoạt giảm giá ngay lập tức, phô diễn luồng FOMO.
-- [ ] **Nút "Reset Demo":** Một endpoint/nút ẩn giúp xóa các đơn đã đặt và phục hồi số lượng kho về ban đầu để nhanh chóng chuẩn bị cho lượt pitch tiếp theo.
+- [x] **Nút "Reset Demo":** Một endpoint/nút ẩn giúp xóa các đơn đã đặt và phục hồi số lượng kho về ban đầu để nhanh chóng chuẩn bị cho lượt pitch tiếp theo.
 - [ ] **Dữ liệu mẫu rực rỡ (Seed Data):** Chuẩn bị sẵn một tập dữ liệu cửa hàng, món ăn có hình ảnh sắc nét, tên gọi hấp dẫn để giao diện luôn ở trạng thái tốt nhất.
 
 ## 5. Chứng minh Hiệu quả Giảm Rác Thải (Bám sát Track Chủ đề) ♻️
